@@ -136,6 +136,18 @@ curl http://127.0.0.1:8000/version
 curl http://127.0.0.1:8000/metadata
 ```
 
+## Continuous Integration
+
+GitHub Actions runs a CI workflow on every push and pull request to `main`.
+
+The workflow validates:
+
+- Python 3.12 dependency installation
+- FastAPI endpoint tests with `pytest` and `httpx`
+- Docker image build with `docker build -t cloudops-api .`
+
+The CI workflow does not deploy to AWS, push to ECR, or require AWS secrets.
+
 ## AWS Deployment
 
 The Docker image was pushed to Amazon ECR:
@@ -214,10 +226,10 @@ The demo infrastructure was destroyed after proof capture, and `terraform state 
 
 ## Current Limitations
 
-- GitHub Actions CI/CD is not added yet.
+- GitHub Actions currently runs CI only; deployment automation is not added yet.
 - Deployment is currently manual through Docker, AWS CLI, ECR, and Terraform.
 - The public ALB endpoint is not permanently live because resources were destroyed after verification.
 
 ## Next Planned Step
 
-Add GitHub Actions CI/CD to build the Docker image, push it to ECR, and deploy updates to ECS automatically.
+Add GitHub Actions CD to push the Docker image to ECR and deploy updates to ECS automatically.
