@@ -148,6 +148,8 @@ The workflow validates:
 
 The CI workflow does not deploy to AWS, push to ECR, or require AWS secrets.
 
+CI proof is captured in [`github-actions-ci-success.png`](screenshots/github-actions-ci-success.png).
+
 ## AWS Deployment
 
 The Docker image was pushed to Amazon ECR:
@@ -210,6 +212,7 @@ Example successful responses:
 | Load balancer active | [`load-balancer-active.png`](screenshots/load-balancer-active.png) |
 | CloudWatch log group and stream | [`cloudwatch-logs.png`](screenshots/cloudwatch-logs.png) |
 | ECR image pushed | [`ecr-image-latest.png`](screenshots/ecr-image-latest.png) |
+| GitHub Actions CI passed | [`github-actions-ci-success.png`](screenshots/github-actions-ci-success.png) |
 
 ## Cost Control
 
