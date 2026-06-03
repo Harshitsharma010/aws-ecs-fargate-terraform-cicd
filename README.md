@@ -1,5 +1,7 @@
 # AWS ECS Fargate Terraform CI/CD Deployment Lab
 
+[![CI](https://github.com/Harshitsharma010/aws-ecs-fargate-terraform-cicd/actions/workflows/ci.yml/badge.svg)](https://github.com/Harshitsharma010/aws-ecs-fargate-terraform-cicd/actions/workflows/ci.yml)
+
 Containerized FastAPI service deployed to AWS ECS Fargate using Docker, Amazon ECR, Terraform, Application Load Balancer, IAM, security groups, and CloudWatch Logs.
 
 > **Status**  
@@ -58,6 +60,16 @@ ECS task logs -> CloudWatch Logs: /ecs/cloudops-api
 ```
 
 Full architecture notes are available in [`docs/architecture.md`](docs/architecture.md).
+
+## Reviewer Documentation
+
+| Document | Purpose |
+| --- | --- |
+| [`docs/architecture.md`](docs/architecture.md) | Explains AWS request flow, security boundaries, health checks, and cost control |
+| [`docs/terraform-explained.md`](docs/terraform-explained.md) | Explains each Terraform file and major resource in plain language |
+| [`docs/troubleshooting.md`](docs/troubleshooting.md) | Documents common ECS, ALB, DNS, Terraform, and CloudWatch failure modes |
+| [`docs/interview-questions.md`](docs/interview-questions.md) | Interview-ready questions and answers for this project |
+| [`docs/github-repo-settings.md`](docs/github-repo-settings.md) | Suggested GitHub description, topics, pinned repo notes, and issue ideas |
 
 ## Tech Stack
 
@@ -241,6 +253,12 @@ terraform destroy
 ```
 
 The demo infrastructure was destroyed after proof capture, and `terraform state list` returned no managed resources.
+
+## Resume-Ready Bullets
+
+- Deployed a Dockerized FastAPI service to AWS ECS Fargate using Terraform-managed VPC, public subnets, ALB, target group, security groups, IAM execution role, and CloudWatch Logs.
+- Built and verified a GitHub Actions CI workflow that installs dependencies, runs FastAPI endpoint tests, and validates Docker image build.
+- Verified public ALB routing, ECS target group health checks, ECR image usage, CloudWatch log capture, and post-demo cleanup with `terraform destroy`.
 
 ## Current Limitations
 
