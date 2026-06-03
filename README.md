@@ -11,6 +11,18 @@ This project demonstrates a production-style cloud deployment flow for a small b
 
 The goal is to show the core CloudOps workflow without adding unnecessary services such as NAT Gateway, RDS, Route 53, Kubernetes, or private networking.
 
+## Remote Reviewer Snapshot
+
+| Question | Answer |
+| --- | --- |
+| What was deployed? | A Dockerized FastAPI API named `cloudops-api` |
+| Where did it run? | AWS ECS Fargate in `ap-south-1` |
+| How was infrastructure created? | Terraform HCL in `infra/` |
+| How was traffic routed? | Public ALB on port `80` to ECS task port `8000` |
+| How were logs captured? | CloudWatch Logs group `/ecs/cloudops-api` |
+| How was CI validated? | GitHub Actions ran API tests and Docker image build |
+| Was cost controlled? | Yes. The Terraform stack was destroyed after proof capture |
+
 ## What This Project Proves
 
 | Area | Proof |
@@ -45,6 +57,8 @@ Amazon ECR: cloudops-api:latest
 ECS task logs -> CloudWatch Logs: /ecs/cloudops-api
 ```
 
+Full architecture notes are available in [`docs/architecture.md`](docs/architecture.md).
+
 ## Tech Stack
 
 | Layer | Tooling |
@@ -63,23 +77,24 @@ ECS task logs -> CloudWatch Logs: /ecs/cloudops-api
 
 ```text
 aws-ecs-fargate-terraform-cicd/
-├── app/
-│   ├── main.py
-│   └── requirements.txt
-├── infra/
-│   ├── provider.tf
-│   ├── variables.tf
-│   ├── main.tf
-│   ├── outputs.tf
-│   └── README.md
-├── docs/
-│   └── README.md
-├── screenshots/
-│   └── deployment proof images
-├── Dockerfile
-├── .dockerignore
-├── .gitignore
-└── README.md
+|-- app/
+|   |-- main.py
+|   `-- requirements.txt
+|-- infra/
+|   |-- provider.tf
+|   |-- variables.tf
+|   |-- main.tf
+|   |-- outputs.tf
+|   `-- README.md
+|-- docs/
+|   |-- README.md
+|   `-- architecture.md
+|-- screenshots/
+|   `-- numbered deployment proof images
+|-- Dockerfile
+|-- .dockerignore
+|-- .gitignore
+`-- README.md
 ```
 
 ## API Endpoints
@@ -148,7 +163,7 @@ The workflow validates:
 
 The CI workflow does not deploy to AWS, push to ECR, or require AWS secrets.
 
-CI proof is captured in [`github-actions-ci-success.png`](screenshots/github-actions-ci-success.png).
+CI proof is captured in [`09-github-actions-ci-success.png`](screenshots/09-github-actions-ci-success.png).
 
 ## AWS Deployment
 
@@ -202,17 +217,17 @@ Example successful responses:
 
 ## Deployment Proof
 
-| Proof | Screenshot |
-| --- | --- |
-| Terraform apply completed | [`terraform-apply-success.png`](screenshots/terraform-apply-success.png) |
-| ALB endpoint returned API responses | [`alb-curl-health-version-metadata.png`](screenshots/alb-curl-health-version-metadata.png) |
-| ECS cluster created | [`ecs-cluster.png`](screenshots/ecs-cluster.png) |
-| ECS service running | [`ecs-service-running.png`](screenshots/ecs-service-running.png) |
-| Target group healthy | [`target-group-healthy.png`](screenshots/target-group-healthy.png) |
-| Load balancer active | [`load-balancer-active.png`](screenshots/load-balancer-active.png) |
-| CloudWatch log group and stream | [`cloudwatch-logs.png`](screenshots/cloudwatch-logs.png) |
-| ECR image pushed | [`ecr-image-latest.png`](screenshots/ecr-image-latest.png) |
-| GitHub Actions CI passed | [`github-actions-ci-success.png`](screenshots/github-actions-ci-success.png) |
+| Step | Proof | Screenshot |
+| --- | --- | --- |
+| 01 | Terraform apply completed | [`01-terraform-apply-success.png`](screenshots/01-terraform-apply-success.png) |
+| 02 | ECR image pushed | [`02-ecr-image-latest.png`](screenshots/02-ecr-image-latest.png) |
+| 03 | ECS cluster active | [`03-ecs-cluster-active.png`](screenshots/03-ecs-cluster-active.png) |
+| 04 | ECS service running | [`04-ecs-service-running.png`](screenshots/04-ecs-service-running.png) |
+| 05 | Target group healthy | [`05-target-group-healthy.png`](screenshots/05-target-group-healthy.png) |
+| 06 | Load balancer active | [`06-load-balancer-active.png`](screenshots/06-load-balancer-active.png) |
+| 07 | ALB endpoint returned API responses | [`07-alb-api-curl-responses.png`](screenshots/07-alb-api-curl-responses.png) |
+| 08 | CloudWatch log group and stream | [`08-cloudwatch-logs.png`](screenshots/08-cloudwatch-logs.png) |
+| 09 | GitHub Actions CI passed | [`09-github-actions-ci-success.png`](screenshots/09-github-actions-ci-success.png) |
 
 ## Cost Control
 
