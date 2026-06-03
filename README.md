@@ -1,54 +1,139 @@
 # AWS ECS Fargate Terraform CI/CD Deployment Lab
 
-A containerized FastAPI service designed to demonstrate AWS ECS Fargate deployment using Docker, ECR, ALB, Terraform, GitHub Actions, IAM, security groups, and CloudWatch.
+Containerized FastAPI service deployed to AWS ECS Fargate using Docker, Amazon ECR, Terraform, Application Load Balancer, IAM, security groups, and CloudWatch Logs.
 
-## What This Project Will Prove
+> **Status**  
+> Manual AWS deployment completed and verified. Infrastructure was destroyed after screenshots to avoid ongoing AWS charges.
 
-- Dockerized backend API
-- ECR image workflow
-- ECS Fargate deployment
-- Application Load Balancer public endpoint
-- Terraform infrastructure
-- GitHub Actions CI/CD
-- CloudWatch logs and health checks
-- IAM role and security group basics
+## Project Overview
 
-## Completed Scope
+This project demonstrates a production-style cloud deployment flow for a small backend API. The API is packaged as a Docker image, pushed to Amazon ECR, and deployed to ECS Fargate behind a public Application Load Balancer.
 
-- FastAPI app
-- Dockerfile
-- Local Docker testing
-- ECR image workflow
-- Terraform infrastructure for ECS Fargate
-- Public Application Load Balancer endpoint
-- CloudWatch log group with 7-day retention
-- Deployment screenshots and proof
+The goal is to show the core CloudOps workflow without adding unnecessary services such as NAT Gateway, RDS, Route 53, Kubernetes, or private networking.
+
+## What This Project Proves
+
+| Area | Proof |
+| --- | --- |
+| Backend API | FastAPI service with health, version, metadata, and error endpoints |
+| Containerization | Dockerfile builds a runnable `cloudops-api` image |
+| Image registry | Docker image pushed to Amazon ECR |
+| Infrastructure as Code | Terraform creates AWS networking, ECS, ALB, IAM, and logs |
+| Compute | ECS Fargate runs the container without managing EC2 servers |
+| Public routing | ALB exposes the API over HTTP port `80` |
+| Health checks | ALB target group checks `/health` on container port `8000` |
+| Observability | Container logs are shipped to CloudWatch Logs |
+| Cost control | Infrastructure can be destroyed with `terraform destroy` |
+
+## Architecture
+
+```text
+User
+  |
+  | HTTP :80
+  v
+Application Load Balancer
+  |
+  | Target group :8000
+  v
+ECS Fargate Service
+  |
+  | Runs container image
+  v
+Amazon ECR: cloudops-api:latest
+
+ECS task logs -> CloudWatch Logs: /ecs/cloudops-api
+```
+
+## Tech Stack
+
+| Layer | Tooling |
+| --- | --- |
+| API | FastAPI, Uvicorn |
+| Runtime | Python 3.12 slim container |
+| Container | Docker |
+| Registry | Amazon ECR |
+| Infrastructure | Terraform |
+| Compute | AWS ECS Fargate |
+| Networking | VPC, public subnets, Internet Gateway, ALB |
+| Security | IAM task execution role, ALB and ECS security groups |
+| Logs | Amazon CloudWatch Logs |
+
+## Repository Structure
+
+```text
+aws-ecs-fargate-terraform-cicd/
+├── app/
+│   ├── main.py
+│   └── requirements.txt
+├── infra/
+│   ├── provider.tf
+│   ├── variables.tf
+│   ├── main.tf
+│   ├── outputs.tf
+│   └── README.md
+├── docs/
+│   └── README.md
+├── screenshots/
+│   └── deployment proof images
+├── Dockerfile
+├── .dockerignore
+├── .gitignore
+└── README.md
+```
 
 ## API Endpoints
 
-| Method | Endpoint | Description |
+| Method | Endpoint | Purpose |
 | --- | --- | --- |
-| GET | `/` | Service status and project message |
-| GET | `/health` | Health check with current UTC timestamp |
-| GET | `/version` | App version and environment values |
-| GET | `/metadata` | Service metadata for the deployment lab |
-| GET | `/error` | Intentional exception for log validation |
+| `GET` | `/` | Service status and project message |
+| `GET` | `/health` | Health check with current UTC timestamp |
+| `GET` | `/version` | Returns `APP_VERSION` and `APP_ENV` |
+| `GET` | `/metadata` | Returns runtime and target platform metadata |
+| `GET` | `/error` | Raises an intentional exception for CloudWatch log validation |
 
 ## Run Locally
 
+Install dependencies:
+
 ```bash
 pip install -r app/requirements.txt
+```
+
+Run the API:
+
+```bash
 uvicorn app.main:app --reload
+```
+
+Test endpoints:
+
+```bash
+curl http://127.0.0.1:8000/health
+curl http://127.0.0.1:8000/version
+curl http://127.0.0.1:8000/metadata
 ```
 
 ## Run With Docker
 
+Build the image:
+
 ```bash
 docker build -t cloudops-api .
+```
+
+Run the container:
+
+```bash
 docker run -p 8000:8000 cloudops-api
-curl http://localhost:8000/health
-curl http://localhost:8000/version
-curl http://localhost:8000/metadata
+```
+
+Test the containerized API:
+
+```bash
+curl http://127.0.0.1:8000/health
+curl http://127.0.0.1:8000/version
+curl http://127.0.0.1:8000/metadata
 ```
 
 ## AWS Deployment
@@ -59,19 +144,11 @@ The Docker image was pushed to Amazon ECR:
 753569822016.dkr.ecr.ap-south-1.amazonaws.com/cloudops-api:latest
 ```
 
-Terraform creates the AWS infrastructure in `ap-south-1`:
+Terraform deploys the AWS infrastructure in `ap-south-1`.
 
-- VPC with two public subnets
-- Internet Gateway and public route table
-- Application Load Balancer on port `80`
-- Target group forwarding to container port `8000`
-- ECS cluster and Fargate service
-- ECS task definition using the ECR image
-- ECS task execution IAM role
-- Security groups for ALB and ECS tasks
-- CloudWatch log group `/ecs/cloudops-api`
+### Terraform Commands
 
-Run Terraform from the `infra/` folder:
+Run from the `infra/` directory:
 
 ```bash
 terraform init
@@ -79,7 +156,18 @@ terraform plan
 terraform apply
 ```
 
-After apply, Terraform outputs the ALB DNS name. Test the deployed API:
+After deployment, Terraform outputs:
+
+| Output | Description |
+| --- | --- |
+| `alb_dns_name` | Public ALB DNS name for API testing |
+| `ecs_cluster_name` | ECS cluster created by Terraform |
+| `ecs_service_name` | ECS service running the Fargate task |
+| `ecr_image_uri` | ECR image used by the task definition |
+
+### Deployed Endpoint Tests
+
+The deployed API was verified through the ALB DNS name:
 
 ```bash
 curl http://cloudops-api-alb-380403081.ap-south-1.elb.amazonaws.com/health
@@ -87,33 +175,49 @@ curl http://cloudops-api-alb-380403081.ap-south-1.elb.amazonaws.com/version
 curl http://cloudops-api-alb-380403081.ap-south-1.elb.amazonaws.com/metadata
 ```
 
+Example successful responses:
+
+```json
+{"status":"healthy","timestamp":"2026-06-03T21:56:35.468463Z"}
+{"version":"1.0.0","environment":"dev"}
+{"service":"cloudops-api","runtime":"FastAPI","containerized":true,"target_platform":"AWS ECS Fargate","logs":"CloudWatch"}
+```
+
+> **Note**  
+> The live ALB endpoint was destroyed after verification to prevent ongoing AWS charges. Screenshots in this repository document the successful deployment.
+
 ## Deployment Proof
 
-Screenshots are stored in `screenshots/` and include proof of:
+| Proof | Screenshot |
+| --- | --- |
+| Terraform apply completed | [`terraform-apply-success.png`](screenshots/terraform-apply-success.png) |
+| ALB endpoint returned API responses | [`alb-curl-health-version-metadata.png`](screenshots/alb-curl-health-version-metadata.png) |
+| ECS cluster created | [`ecs-cluster.png`](screenshots/ecs-cluster.png) |
+| ECS service running | [`ecs-service-running.png`](screenshots/ecs-service-running.png) |
+| Target group healthy | [`target-group-healthy.png`](screenshots/target-group-healthy.png) |
+| Load balancer active | [`load-balancer-active.png`](screenshots/load-balancer-active.png) |
+| CloudWatch log group and stream | [`cloudwatch-logs.png`](screenshots/cloudwatch-logs.png) |
+| ECR image pushed | [`ecr-image-latest.png`](screenshots/ecr-image-latest.png) |
 
-- ECR image pushed with the `latest` tag
-- Terraform apply output
-- ECS cluster and service running
-- Fargate task running
-- ALB public endpoint responding
-- Target group health check passing
-- CloudWatch log group and log stream
+## Cost Control
 
-## Destroy After Demo
+This lab intentionally avoids NAT Gateway, RDS, Route 53, EKS, private subnets, and other paid extras. The Application Load Balancer, ECS Fargate task, CloudWatch logs, and data transfer can still generate charges while running.
 
-This project creates AWS resources that can incur charges, especially the Application Load Balancer and ECS Fargate task. Destroy the infrastructure after testing and screenshots:
+Destroy the infrastructure after testing:
 
 ```bash
 cd infra
 terraform destroy
 ```
 
-## Next Planned Steps
+The demo infrastructure was destroyed after proof capture, and `terraform state list` returned no managed resources.
 
-- Add GitHub Actions CI/CD
-- Improve documentation with a step-by-step deployment guide
-- Add more screenshots as deployment proof
+## Current Limitations
 
-## Known Limitation
+- GitHub Actions CI/CD is not added yet.
+- Deployment is currently manual through Docker, AWS CLI, ECR, and Terraform.
+- The public ALB endpoint is not permanently live because resources were destroyed after verification.
 
-GitHub Actions CI/CD is not added yet. The current deployment is manual using Docker, ECR, Terraform, and AWS CLI.
+## Next Planned Step
+
+Add GitHub Actions CI/CD to build the Docker image, push it to ECR, and deploy updates to ECS automatically.
