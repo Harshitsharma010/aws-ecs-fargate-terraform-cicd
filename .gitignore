@@ -1,0 +1,10 @@
+**pycache**/
+*.pyc
+.env
+.venv/
+venv/
+.DS_Store
+infra/.terraform/
+infra/*.tfstate
+infra/*.tfstate.*
+*.log
