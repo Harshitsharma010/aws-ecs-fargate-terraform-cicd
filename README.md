@@ -70,6 +70,7 @@ Full architecture notes are available in [`docs/architecture.md`](docs/architect
 | [`docs/troubleshooting.md`](docs/troubleshooting.md) | Documents common ECS, ALB, DNS, Terraform, and CloudWatch failure modes |
 | [`docs/interview-questions.md`](docs/interview-questions.md) | Interview-ready questions and answers for this project |
 | [`docs/github-repo-settings.md`](docs/github-repo-settings.md) | Suggested GitHub description, topics, pinned repo notes, and issue ideas |
+| [`SECURITY.md`](SECURITY.md) | Security notes, current controls, limitations, and hardening backlog |
 
 ## Tech Stack
 
@@ -176,6 +177,8 @@ The workflow validates:
 The CI workflow does not deploy to AWS, push to ECR, or require AWS secrets.
 
 CI proof is captured in [`09-github-actions-ci-success.png`](screenshots/09-github-actions-ci-success.png).
+
+Dependabot is configured to monitor GitHub Actions, Python dependencies, Docker base image updates, and Terraform provider updates.
 
 ## AWS Deployment
 
