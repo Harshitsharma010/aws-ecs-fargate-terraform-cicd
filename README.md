@@ -170,6 +170,7 @@ GitHub Actions runs a CI workflow on every push and pull request to `main`.
 
 The workflow validates:
 
+- Terraform formatting and configuration validation without AWS credentials
 - Python 3.12 dependency installation
 - FastAPI endpoint tests with `pytest` and `httpx`
 - Docker image build with `docker build -t cloudops-api .`
